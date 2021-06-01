@@ -1,3 +1,13 @@
+original: https://github.com/jam1garner/mscdec
+
+Can't fork 2 versions, so this is made
+
+Note: While recompiling a embedded func pointer reference in sys_2D syscall, you will need to manually change the bytecode.
+
+e.g. sys_2D(0x3, 0xd, var1, func_896(func_797(var1, 0x2)));
+bytecode: 8A 00 00 00 03 8A 00 00 00 0D 8B 00 00 01
+search 0x2E in front direction, and change it to 0xAE for each amount of func pointer reference in sys_2D syscall (usually 2 for new type script and 3 for new new type script)
+
 # msclang
 
 msclang is a custom compiler written in python made to compile C to MSC bytecode. MSC bytecode is a bytecode language used by Super Smash Brothers for Wii U in order to control character logic. It's name comes from the mix of "clang" a popular C compiler and, of course, MSC itself, however no part of clang is used and the name is only intended for pleasure of the user. This in no way indicates any affiliation with clang or it's developers.
