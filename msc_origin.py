@@ -8,8 +8,8 @@ isPython3 = version_info >= (3,)
 assert isPython3 #If this fails switch to python 3
 import struct, tempfile
 
-MSC_MAGIC = b'\xB2\xAC\xBC\xBA\xE6\x90\x32\x01\x0A\x21\xAF\x16\x00\x00\x00\x00'
-ENDIANESS = '>'
+MSC_MAGIC = b'\xB2\xAC\xBC\xBA\xE6\x90\x32\x01\xFD\x02\x00\x00\x00\x00\x00\x00'
+
 COMMAND_IDS = {
     "nop"            : 0x0,
     "begin"          : 0x2,
@@ -368,12 +368,12 @@ class Command:
         self.pushBit = (int(byteBuffer[pos]) & 0x80) != 0
         if self.command in COMMAND_NAMES:
             self.paramSize = getSizeFromFormat(COMMAND_FORMAT[self.command])
-            self.parameters = list(struct.unpack(ENDIANESS+COMMAND_FORMAT[self.command], byteBuffer[pos+1:pos+1+self.paramSize]))
+            self.parameters = list(struct.unpack('>'+COMMAND_FORMAT[self.command], byteBuffer[pos+1:pos+1+self.paramSize]))
         else:
             self.parameters = [self.command]
             self.command = 0xFFFE #unknown command, display as "byte X"
 
-    def write(self, endian=ENDIANESS):
+    def write(self, endian='>'):
         if self.command in [0xFFFE, 0xFFFF]:
             returnBytes = bytes()
         else:
@@ -445,7 +445,6 @@ class MscScript:
         self.cmds = disassembleCommands(f.read(end - start), start - 0x30)
 
     def getInstructionText(self, index):
-        cmds = [str(cmd) for cmd in self.cmds] # debug
         if index < 0 or index >= len(self.cmds):
             return ""
         else:
@@ -459,7 +458,6 @@ class MscScript:
         return None
 
     def getInstructionOfIndex(self, index):
-        cmd = self.cmds[index]
         return cmd[index].commandPosition
 
     def getCommand(self, location):
@@ -533,7 +531,7 @@ class MscFile:
     def __len__(self):
         return len(self.scripts)
 
-    def readFromFile(self, f, headerEndianess = ENDIANESS):
+    def readFromFile(self, f, headerEndianess = '<'):
         f.seek(0x10)
         entriesOffset = readInt(f, headerEndianess) + 0x30
         endOfScripts = entriesOffset
@@ -569,7 +567,7 @@ class MscFile:
             self.scripts.append(newScript)
         return self
 
-    def readFromBytes(self, b, headerEndianess=ENDIANESS):
+    def readFromBytes(self, b, headerEndianess='>'):
         with tempfile.SpooledTemporaryFile(mode='w+b') as f:
             f.write(b)
             f.seek(0)

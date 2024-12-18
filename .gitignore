@@ -1,0 +1,5 @@
+*.c
+*.mscsb
+*.bin
+__pycache__
+.vscode
