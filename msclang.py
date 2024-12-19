@@ -1049,6 +1049,37 @@ def main(arguments):
             args.filename = os.path.basename(os.path.splitext(file)[0]) + '.mscsb'
         compileString(preprocess(file))
 
+def handle_EXVS2_2E_to_AE(args):
+    file_name = os.path.basename(os.path.splitext(args.files[0])[0]) + '.mscsb'
+    target_index1 = bytes([0x8A, 0x00, 0x01, 0x00, 0x01, 0x8A, 0x00, 0x00, 0x00, 0x10, 0x8B, 0x00, 0x00, 0x01])
+    target_index2 = bytes([0x8A, 0x00, 0x01, 0x00, 0x01, 0x8A, 0x00, 0x00, 0x00, 0x11, 0x8B, 0x00, 0x00, 0x01])
+    target_index3 = bytes([0x8A, 0x00, 0x01, 0x00, 0x01, 0x8A, 0x00, 0x00, 0x00, 0x12, 0x8B, 0x00, 0x00, 0x01])
+        
+    with open(file_name, 'rb') as file:
+        content = file.read()
+        content = bytearray(content)
+    target_position1 = content.find(target_index1)
+    target_position2 = content.find(target_index2)
+    target_position3 = content.find(target_index3)
+    
+    if target_position1:
+        # modify The 0x2E to 0xAE
+        content[target_position1 + len(target_index1)] = 0xAE
+    
+    if target_position2:
+        # modify The 0x2E to 0xAE
+        content[target_position2 + len(target_index2)] = 0xAE
+        
+    if target_position3:
+        # modify The 0x2E to 0xAE
+        content[target_position3 + len(target_index3)] = 0xAE
+    
+    with open(file_name, 'wb') as file:
+        file.write(content)
+    
+    print(f"Modify the {file_name} from 0x2E to 0xAE Done")
+        
+
 if __name__ == "__main__":
     parser = ArgumentParser(description="Compile msC to MSC bytecode")
     parser.add_argument('files', metavar='files', type=str, nargs='+',
@@ -1059,3 +1090,4 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--pushInt', dest='usePushShort', action='store_false', help='Disable using pushShort as a space saver')
     parser.add_argument('-x', '--xmlPath', dest='xmlPath', help="Path to load overload MSC xml info")
     main(parser.parse_args())
+    handle_EXVS2_2E_to_AE(args)
